@@ -1,12 +1,10 @@
-import { NextResponse } from 'next/server';
-
-export async function POST(request: Request) {
+export async function POST(request) {
   try {
     const { text, voice = 'xiaoyun' } = await request.json();
     const apiKey = process.env.ALIYUN_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: '请配置 API Key' }, { status: 500 });
+      return Response.json({ error: '请配置 API Key' }, { status: 500 });
     }
 
     const response = await fetch(
@@ -37,17 +35,17 @@ export async function POST(request: Request) {
       const audioBase64 = data.output?.audio || data.data?.audio;
       if (audioBase64) {
         const audioUrl = `data:audio/mp3;base64,${audioBase64}`;
-        return NextResponse.json({ audioUrl });
+        return Response.json({ audioUrl });
       }
-      return NextResponse.json({ error: '无音频数据' }, { status: 500 });
+      return Response.json({ error: '无音频数据' }, { status: 500 });
     } else {
-      return NextResponse.json(
+      return Response.json(
         { error: '语音合成失败', details: data.message || data.msg },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error('TTS错误:', error);
-    return NextResponse.json({ error: '语音合成失败' }, { status: 500 });
+    return Response.json({ error: '语音合成失败' }, { status: 500 });
   }
 }

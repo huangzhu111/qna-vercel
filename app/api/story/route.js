@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
     const apiKey = process.env.ALIYUN_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: '请配置 API Key' }, { status: 500 });
+      return Response.json({ error: '请配置 API Key' }, { status: 500 });
     }
 
     const themes = [
@@ -51,15 +51,15 @@ export async function POST() {
       const content = data.choices[0].message.content;
       try {
         const result = JSON.parse(content);
-        return NextResponse.json(result);
+        return Response.json(result);
       } catch (e) {
-        return NextResponse.json({ error: '解析失败' }, { status: 500 });
+        return Response.json({ error: '解析失败' }, { status: 500 });
       }
     } else {
-      return NextResponse.json({ error: 'API 返回错误' }, { status: 500 });
+      return Response.json({ error: 'API 返回错误' }, { status: 500 });
     }
   } catch (error) {
     console.error('生成故事错误:', error);
-    return NextResponse.json({ error: '生成失败' }, { status: 500 });
+    return Response.json({ error: '生成失败' }, { status: 500 });
   }
 }
