@@ -42,6 +42,22 @@ export default function Home() {
   async function playStory() {
     setLoading(true);
     try {
+      // 先尝试浏览器自带语音（兼容性更好）
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(story);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.85;
+        await new Promise(resolve => {
+          utterance.onend = resolve;
+          utterance.onerror = resolve;
+          window.speechSynthesis.speak(utterance);
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // 备用：尝试 API 语音
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,21 +67,17 @@ export default function Home() {
       if (data.audioUrl) {
         const audio = new Audio(data.audioUrl);
         await audio.play();
-      } else if (window.speechSynthesis) {
+      }
+    } catch (error) {
+      console.log('TTS error, using browser fallback:', error);
+      // 最后备用：浏览器语音
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(story);
         utterance.lang = 'zh-CN';
         utterance.rate = 0.85;
-        await new Promise(resolve => {
-          utterance.onend = resolve;
-          window.speechSynthesis.speak(utterance);
-        });
+        window.speechSynthesis.speak(utterance);
       }
-    } catch (error) {
-      // 备用浏览器语音
-      const utterance = new SpeechSynthesisUtterance(story);
-      utterance.lang = 'zh-CN';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
     } finally {
       setLoading(false);
     }
@@ -110,7 +122,24 @@ export default function Home() {
     else if (score >= 33) message = '加油！你答对了' + correctCount + '道题，多练习会更好的！';
     else message = '别灰心，慢慢来！你答对了' + correctCount + '道题。';
     
+    setLoading(true);
     try {
+      // 先尝试浏览器自带语音
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.85;
+        await new Promise(resolve => {
+          utterance.onend = resolve;
+          utterance.onerror = resolve;
+          window.speechSynthesis.speak(utterance);
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // 备用：API 语音
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,7 +151,14 @@ export default function Home() {
         await audio.play();
       }
     } catch {
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(message));
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'zh-CN';
+        window.speechSynthesis.speak(utterance);
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
