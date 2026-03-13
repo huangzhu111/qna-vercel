@@ -1,7 +1,8 @@
 export async function POST(request) {
   try {
     const { text, voice = 'xiaoyun' } = await request.json();
-    const apiKey = process.env.ALIYUN_API_KEY;
+    // 兼容大小写
+    const apiKey = process.env.ALIYUN_API_KEY || process.env.aliyun_api_key;
 
     if (!apiKey) {
       return Response.json({ error: '请配置 API Key' }, { status: 500 });

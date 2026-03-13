@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  const apiKey = process.env.ALIYUN_API_KEY;
+  // 兼容大小写
+  const apiKey = process.env.ALIYUN_API_KEY || process.env.aliyun_api_key;
   
   console.log('API Key present:', !!apiKey);
   
