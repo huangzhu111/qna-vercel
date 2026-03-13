@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [screen, setScreen] = useState('start');
@@ -12,7 +12,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
-  // 加载历史记录
+  // iOS 需要先解锁音频
+  const unlockAudio = () => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      // 播放一个静音来解锁 iOS 音频
+      const silentUtterance = new SpeechSynthesisUtterance(' ');
+      silentUtterance.volume = 0;
+      window.speechSynthesis.speak(silentUtterance);
+    }
+  };
   useState(() => {
     try {
       const h = JSON.parse(localStorage.getItem('qna-history') || '[]');
@@ -41,6 +49,13 @@ export default function Home() {
 
   async function playStory() {
     setLoading(true);
+    
+    // iOS 需要先解锁音频
+    unlockAudio();
+    
+    // 等待一下
+    await new Promise(r => setTimeout(r, 100));
+    
     try {
       // 先尝试浏览器自带语音（兼容性更好）
       if (window.speechSynthesis) {
